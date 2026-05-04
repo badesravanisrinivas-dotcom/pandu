@@ -1,0 +1,29 @@
+from airflow import DAG
+from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
+from datetime import datetime
+
+default_args = {
+    "owner": "sravani",
+    "start_date": datetime(2026, 4, 27),
+    "retries": 1
+}
+
+with DAG(
+    dag_id="gcs_to_bigquery_load",
+    default_args=default_args,
+    schedule_interval="@daily",   # daily schedule
+    catchup=False
+) as dag:
+
+    load_csv = GCSToBigQueryOperator(
+        task_id="load_csv",
+        bucket="aruna123",
+        source_objects=["employe.csv"],
+        destination_project_dataset_table="project-cf9e5bf8-63dd-46e6-8fd:sr.employee_123",
+        source_format="CSV",
+        skip_leading_rows=1,
+        autodetect=True,
+        write_disposition="WRITE_TRUNCATE"
+    )
+
+    load_csv
